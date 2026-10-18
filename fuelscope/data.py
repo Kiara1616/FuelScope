@@ -1,20 +1,29 @@
 """Contrato explícito para archivos aportados por el usuario."""
+
 import pandas as pd
 
 REQUIRED = ("observed_date", "fuel_type", "price")
 OPTIONAL = ("department", "province", "district")
 
 
-def normalize(frame: pd.DataFrame, mapping: dict[str, str], units: dict[str, str]) -> tuple[pd.DataFrame, dict]:
+def normalize(
+    frame: pd.DataFrame, mapping: dict[str, str], units: dict[str, str]
+) -> tuple[pd.DataFrame, dict]:
     """Valida y normaliza columnas seleccionadas; nunca infiere unidades."""
     missing = [key for key in REQUIRED if key not in mapping or mapping[key] not in frame]
     if missing:
         raise ValueError(f"Faltan columnas obligatorias: {', '.join(missing)}")
     if len(set(mapping.values())) != len(mapping):
         raise ValueError("Cada campo debe corresponder a una columna diferente.")
+    if frame.columns.duplicated().any():
+        raise ValueError("El CSV contiene nombres de columnas duplicados.")
+    if len(frame) > 1_000_000:
+        raise ValueError("El CSV supera el límite de un millón de filas de esta versión.")
     selected = {source: target for target, source in mapping.items() if source in frame}
     data = frame.rename(columns=selected)[list(selected.values())].copy()
-    data["observed_date"] = pd.to_datetime(data["observed_date"], errors="coerce", dayfirst=True)
+    data["observed_date"] = pd.to_datetime(
+        data["observed_date"], errors="coerce", dayfirst=True, format="mixed"
+    )
     data["price"] = pd.to_numeric(data["price"], errors="coerce")
     data["fuel_type"] = data["fuel_type"].astype("string").str.strip()
     data["price_unit"] = data["fuel_type"].map(units)
@@ -27,11 +36,21 @@ def normalize(frame: pd.DataFrame, mapping: dict[str, str], units: dict[str, str
         & data["price_unit"].notna()
         & data["price_unit"].ne("")
     ).fillna(False)
-    report = {"raw_rows": len(frame), "valid_rows": int(valid.sum()), "excluded_rows": int((~valid).sum())}
+    report = {
+        "raw_rows": len(frame),
+        "valid_rows": int(valid.sum()),
+        "excluded_rows": int((~valid).sum()),
+        "missing_dates": int(data["observed_date"].isna().sum()),
+        "missing_or_invalid_prices": int(data["price"].isna().sum()),
+        "zero_or_negative_prices": int(data["price"].le(0).sum()),
+        "missing_units": int(data["price_unit"].isna().sum()),
+    }
     return data.loc[valid].reset_index(drop=True), report
 
 
-def filter_data(data: pd.DataFrame, fuel: str, start, end, department: str | None = None) -> pd.DataFrame:
+def filter_data(
+    data: pd.DataFrame, fuel: str, start, end, department: str | None = None
+) -> pd.DataFrame:
     if start > end:
         raise ValueError("La fecha inicial debe ser anterior o igual a la final.")
     mask = data["fuel_type"].eq(fuel) & data["observed_date"].dt.date.between(start, end)

@@ -5,6 +5,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && useradd --create-home appuser
 COPY app.py .
 COPY fuelscope ./fuelscope
+COPY .streamlit ./.streamlit
 USER appuser
 EXPOSE 8501
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health', timeout=3)"
