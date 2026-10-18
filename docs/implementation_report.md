@@ -16,7 +16,7 @@ El portal de datos abiertos devolvió 403/418 al intentar acceder al CSV y al di
 
 ## Verificación en GitHub
 
-El [PR en borrador #1](https://github.com/Kiara1616/insightflow-sales-dashboard/pull/1) conserva la migración aislada de `main`. La [ejecución de CI del PR](https://github.com/Kiara1616/insightflow-sales-dashboard/actions/runs/39156183081) terminó correctamente: jobs `lint`, `test` y `docker-smoke` aprobados. El job `security` se añadió después y requiere verificación en una nueva ejecución. El estado aprobado corresponde a la versión del PR verificada en esa ejecución; cambios posteriores requieren nueva ejecución.
+El [PR en borrador #1](https://github.com/Kiara1616/insightflow-sales-dashboard/pull/1) conserva la migración aislada de `main`. La [ejecución de CI del PR](https://github.com/Kiara1616/insightflow-sales-dashboard/actions/runs/39156392917) terminó correctamente: jobs `lint`, `test`, `docker-smoke` y `security` aprobados. El estado aprobado corresponde a la versión del PR verificada en esa ejecución; cambios posteriores requieren nueva ejecución.
 
 ## Pendiente de verificación
 
