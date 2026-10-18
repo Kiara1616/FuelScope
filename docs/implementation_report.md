@@ -14,6 +14,10 @@ El portal de datos abiertos devolvió 403/418 al intentar acceder al CSV y al di
 
 `python -m pytest -q`: 3 pruebas aprobadas. `python -m compileall -q app.py fuelscope`: sin errores. `docker compose build`: imagen construida. `docker compose up -d`: contenedor saludable y endpoint `/_stcore/health` respondió `ok`; contenedor detenido mediante `docker compose down`.
 
+## Verificación en GitHub
+
+El [PR en borrador #1](https://github.com/Kiara1616/insightflow-sales-dashboard/pull/1) conserva la migración aislada de `main`. La [ejecución de CI del PR](https://github.com/Kiara1616/insightflow-sales-dashboard/actions/runs/39154640503) terminó correctamente: jobs `test` y `docker-smoke` aprobados. El estado aprobado corresponde a la versión del PR verificada en esa ejecución; cambios posteriores requieren nueva ejecución.
+
 ## Pendiente de verificación
 
-CI remoto y despliegue público deben verificarse después de publicar la rama. Para completar la especificación original se requieren CSV y diccionario originales descargados por un canal autorizado. Solo entonces se podrán fijar mapeo, unidades, auditoría, snapshot, automatización y artículo nuevo con cifras verificadas.
+El despliegue público no se modificó. Para completar la especificación original se requieren CSV y diccionario originales descargados por un canal autorizado. Solo entonces se podrán fijar mapeo, unidades, auditoría, snapshot, automatización y artículo nuevo con cifras verificadas.
