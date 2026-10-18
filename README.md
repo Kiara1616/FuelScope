@@ -1,51 +1,35 @@
-# InsightFlow Sales Dashboard
+# FuelScope
 
-Panel interactivo para explorar el rendimiento de ventas por período, región, categoría y producto.
+Explorador de precios históricos de combustibles en Perú. **Estado actual: prototipo funcional con carga de CSV; aún no incluye un snapshot oficial auditado ni un despliegue público nuevo.** No presenta precios actuales ni recomendaciones de compra.
 
-**[Explorar el dashboard](https://insightflow-sales-dashboard-he3kljwft48fj5lkjgtyu.streamlit.app)** · **[Leer el estudio técnico](docs/articulo-devto.md)** · **[Ver la automatización](https://github.com/Kiara1616/insightflow-sales-dashboard/actions)**
+La migración parte del repositorio histórico InsightFlow, cuyo historial y artículo previo permanecen disponibles en Git. El nombre FuelScope responde a la instrucción del propietario.
 
-## Qué permite analizar
+## Fuente y limitaciones
 
-- Ventas totales, unidades vendidas, venta promedio por unidad y producto con mayor facturación.
-- Evolución mensual de las ventas y comparación entre regiones.
-- Resumen por categoría y consulta de los registros filtrados.
-- Selección interactiva de regiones, categorías y fechas.
+La fuente prevista es el [conjunto de OSINERGMIN en la Plataforma Nacional de Datos Abiertos](https://www.datosabiertos.gob.pe/dataset/lista-de-precios-de-combustibles-diaria-reconstruida-partir-de-los-precios-actualizados), con licencia Open Data Commons Attribution License. El catálogo describe observaciones diarias y una frecuencia de publicación mensual. El servidor bloqueó la descarga del CSV y del diccionario desde este entorno. La aplicación no atribuye al archivo cargado una procedencia que no pueda verificar. Consulta [auditoría](docs/data_audit.md) y [fuente](docs/data_source.md).
 
-Los datos de `data/ventas.csv` son **datos de ejemplo** incluidos para demostrar el funcionamiento del panel. No representan ventas reales ni deben utilizarse para tomar decisiones comerciales.
+Las columnas del CSV se asignan explícitamente en la interfaz. Se exige fecha observada, tipo de combustible, precio y una unidad declarada para cada tipo. Se descartan fechas inválidas, precios nulos, cero o negativos y unidades ausentes. El significado de cero queda pendiente de confirmar en el diccionario. Las medianas, percentiles y rankings siempre se calculan para un solo combustible y unidad; cada métrica indica recuento. La carga existe solo durante la sesión y no guarda el CSV en el servidor.
 
-## Tecnologías y estructura
+## Ejecución
 
-La aplicación utiliza **Streamlit** para la interfaz, **Pandas** para preparar y agrupar los datos, y **Plotly** para los gráficos. Las comprobaciones se ejecutan con **Pytest** y se automatizan mediante **GitHub Actions** en cada `push` y `pull request`.
-
-```text
-app.py                       Aplicación y lógica de visualización
-data/ventas.csv              Datos de demostración
-tests/test_app.py             Validaciones del conjunto de datos
-.github/workflows/tests.yml  Integración continua
-requirements.txt             Dependencias de Python
-```
-
-## Ejecutar en local
-
-Requiere Python 3.12. Desde la raíz del repositorio:
+Requiere Python 3.12:
 
 ```bash
 python -m venv .venv
-```
-
-En Windows PowerShell, activa el entorno con `.venv\Scripts\Activate.ps1`; en macOS o Linux, usa `source .venv/bin/activate`. Después ejecuta:
-
-```bash
 python -m pip install -r requirements.txt
 streamlit run app.py
 ```
 
-La aplicación estará disponible en `http://localhost:8501`.
+Pruebas: `python -m pytest -q`. Docker: `docker compose build && docker compose up`.
 
-## Calidad del proyecto
+## Arquitectura
 
-Ejecuta las pruebas localmente con `python -m pytest -q`. El [flujo de integración continua](.github/workflows/tests.yml) repite estas comprobaciones automáticamente en GitHub. La versión pública se actualiza desde la rama `main` en Streamlit Community Cloud.
+```mermaid
+flowchart LR
+    A[CSV cargado por usuario] --> B[Validación y normalización]
+    B --> C[Filtros y métricas]
+    C --> D[Streamlit y Plotly]
+    B --> E[Informe de calidad]
+```
 
-## Estudio técnico
-
-El [artículo del proyecto](docs/articulo-devto.md) documenta la pregunta de análisis, las definiciones de los indicadores, las decisiones de visualización, la automatización y las limitaciones de los datos.
+La descarga automática, el manifiesto del snapshot, la auditoría de datos reales y el despliegue público requieren acceso verificable a los recursos originales. La antigua aplicación de ventas y el [artículo histórico](docs/insightflow-article-historical.md) describen la versión previa y no deben confundirse con FuelScope.

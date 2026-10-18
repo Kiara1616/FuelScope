@@ -1,0 +1,5 @@
+services:
+  fuelscope:
+    build: .
+    ports:
+      - "8501:8501"
