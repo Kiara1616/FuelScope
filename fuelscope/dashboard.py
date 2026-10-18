@@ -2,12 +2,14 @@
 
 import json
 from io import BytesIO
+from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
 from fuelscope.data import OPTIONAL, REQUIRED, filter_data, normalize, summary
+from fuelscope.snapshot import read_snapshot
 
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 SOURCE_URL = (
@@ -38,6 +40,27 @@ def render() -> None:
         "Para explorar precios, carga un CSV obtenido legítimamente y verifica "
         "sus columnas y unidades con el diccionario de la fuente."
     )
+    try:
+        snapshot = read_snapshot(Path("data/processed"))
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
+        st.error(f"El snapshot local no pasó la verificación de integridad: {exc}")
+        return
+    if snapshot is not None:
+        data, manifest = snapshot
+        st.caption(
+            f"Snapshot local {manifest['version_id'][:12]} · "
+            f"última observación {manifest['observation_max_date']} · "
+            f"ingesta {manifest['ingested_at_utc']}. "
+            "La procedencia declarada requiere verificación externa."
+        )
+        render_analysis(
+            data,
+            manifest["quality"],
+            source_file="snapshot local",
+            source_url=manifest["dataset_url"],
+            source_license=manifest["license"],
+        )
+        return
     upload = st.file_uploader("Cargar CSV de precios históricos", type="csv")
     if upload is None:
         st.warning(
@@ -112,6 +135,22 @@ def render() -> None:
     if data.empty:
         st.warning("No hay observaciones válidas después de aplicar el contrato.")
         return
+    render_analysis(
+        data,
+        report,
+        source_file=upload.name,
+        source_url=source_url,
+        source_license=source_license,
+    )
+
+
+def render_analysis(
+    data: pd.DataFrame,
+    report: dict,
+    source_file: str,
+    source_url: str,
+    source_license: str,
+) -> None:
     with st.sidebar:
         st.header("Filtros")
         fuel = st.selectbox("Combustible", sorted(data["fuel_type"].unique()))
@@ -198,7 +237,7 @@ def render() -> None:
         mime="text/csv",
     )
     metadata = {
-        "file_name": upload.name,
+        "file_name": source_file,
         "declared_source_url": source_url or None,
         "declared_license": source_license or None,
         "source_verified_by_app": False,
