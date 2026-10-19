@@ -21,6 +21,7 @@ def main() -> None:
         contract["units"],
         contract["source_url"],
         contract["license"],
+        contract.get("price_columns"),
     )
     print(json.dumps({"status": status, "source_sha256": manifest["source_sha256"]}))
 

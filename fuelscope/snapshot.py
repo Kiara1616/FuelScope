@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from fuelscope.data import normalize
+from fuelscope.data import normalize, normalize_wide, read_csv_bytes
 
 
 def sha256_file(path: Path) -> str:
@@ -52,6 +52,7 @@ def publish_snapshot(
     units: dict[str, str],
     source_url: str,
     license_name: str,
+    price_columns: list[str] | None = None,
 ) -> tuple[str, dict]:
     """Publica un snapshot local; mismo CSV produce no_change sin escrituras."""
     if not source_url or not license_name:
@@ -64,6 +65,7 @@ def publish_snapshot(
         "units": units,
         "source_url": source_url,
         "license": license_name,
+        "price_columns": price_columns,
     }
     fingerprint = source_hash + json.dumps(contract, sort_keys=True, ensure_ascii=False)
     version = hashlib.sha256(fingerprint.encode("utf-8")).hexdigest()
@@ -75,8 +77,11 @@ def publish_snapshot(
             if existing["parquet_sha256"] != sha256_file(root / version / "data.parquet"):
                 raise ValueError("El snapshot existente no pasó la verificación de integridad.")
             return "no_change", existing
-    raw = pd.read_csv(csv_path, encoding="utf-8", low_memory=False)
-    data, quality = normalize(raw, mapping, units)
+    raw = read_csv_bytes(csv_path.read_bytes())
+    if price_columns is None:
+        data, quality = normalize(raw, mapping, units)
+    else:
+        data, quality = normalize_wide(raw, mapping, price_columns, units)
     if data.empty:
         raise ValueError(
             "El CSV no contiene observaciones válidas; se conserva el snapshot anterior."

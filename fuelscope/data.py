@@ -1,9 +1,24 @@
 """Contrato explícito para archivos aportados por el usuario."""
 
+import csv
+from io import BytesIO, TextIOWrapper
+
+import numpy as np
 import pandas as pd
 
 REQUIRED = ("observed_date", "fuel_type", "price")
 OPTIONAL = ("department", "province", "district")
+
+
+def read_csv_bytes(payload: bytes) -> pd.DataFrame:
+    """Lee CSV UTF-8 sin permitir encabezados duplicados ocultados por Pandas."""
+    with TextIOWrapper(BytesIO(payload), encoding="utf-8-sig", newline="") as stream:
+        header = next(csv.reader(stream), None)
+    if not header:
+        raise ValueError("El CSV no contiene encabezado.")
+    if len(set(header)) != len(header):
+        raise ValueError("El CSV contiene nombres de columnas duplicados.")
+    return pd.read_csv(BytesIO(payload), encoding="utf-8-sig", low_memory=False)
 
 
 def normalize(
@@ -25,6 +40,7 @@ def normalize(
         data["observed_date"], errors="coerce", dayfirst=True, format="mixed"
     )
     data["price"] = pd.to_numeric(data["price"], errors="coerce")
+    data["price"] = data["price"].where(np.isfinite(data["price"]))
     data["fuel_type"] = data["fuel_type"].astype("string").str.strip()
     data["price_unit"] = data["fuel_type"].map(units)
     valid = (
@@ -46,6 +62,41 @@ def normalize(
         "missing_units": int(data["price_unit"].isna().sum()),
     }
     return data.loc[valid].reset_index(drop=True), report
+
+
+def normalize_wide(
+    frame: pd.DataFrame,
+    mapping: dict[str, str],
+    price_columns: list[str],
+    units: dict[str, str],
+) -> tuple[pd.DataFrame, dict]:
+    """Convierte columnas de precios explícitas en observaciones por combustible."""
+    if "observed_date" not in mapping or mapping["observed_date"] not in frame:
+        raise ValueError("Falta la columna obligatoria de fecha observada.")
+    if len(set(mapping.values())) != len(mapping):
+        raise ValueError("Cada campo base debe corresponder a una columna diferente.")
+    if frame.columns.duplicated().any():
+        raise ValueError("El CSV contiene nombres de columnas duplicados.")
+    if not price_columns:
+        raise ValueError("Selecciona al menos una columna de precio.")
+    if len(set(price_columns)) != len(price_columns):
+        raise ValueError("Las columnas de precio no deben repetirse.")
+    used = set(mapping.values())
+    if any(column not in frame or column in used for column in price_columns):
+        raise ValueError("Las columnas de precio deben existir y ser distintas de los campos base.")
+    base = frame[list(mapping.values()) + price_columns].rename(
+        columns={source: target for target, source in mapping.items()}
+    )
+    long = base.melt(
+        id_vars=list(mapping),
+        value_vars=price_columns,
+        var_name="fuel_type",
+        value_name="price",
+    )
+    identity = {key: key for key in (*mapping, "fuel_type", "price")}
+    data, report = normalize(long, identity, units)
+    report["source_rows"] = len(frame)
+    return data, report
 
 
 def filter_data(

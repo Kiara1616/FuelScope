@@ -1,14 +1,21 @@
 """Interfaz de exploración local con atribución explícita."""
 
 import json
-from io import BytesIO
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from fuelscope.data import OPTIONAL, REQUIRED, filter_data, normalize, summary
+from fuelscope.data import (
+    OPTIONAL,
+    REQUIRED,
+    filter_data,
+    normalize,
+    normalize_wide,
+    read_csv_bytes,
+    summary,
+)
 from fuelscope.snapshot import read_snapshot
 
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024
@@ -76,8 +83,8 @@ def render() -> None:
         st.error("El archivo supera el límite de 50 MB de esta versión.")
         return
     try:
-        frame = pd.read_csv(BytesIO(upload.getvalue()), encoding="utf-8", low_memory=False)
-    except (UnicodeDecodeError, pd.errors.ParserError, pd.errors.EmptyDataError) as exc:
+        frame = read_csv_bytes(upload.getvalue())
+    except (UnicodeDecodeError, pd.errors.ParserError, pd.errors.EmptyDataError, ValueError) as exc:
         st.error(f"No se pudo leer el CSV en UTF-8: {exc}")
         return
     if frame.empty:
@@ -97,6 +104,11 @@ def render() -> None:
         "Selecciona las columnas reales según el diccionario del archivo. "
         "Los precios iguales a cero se excluyen hasta confirmar su significado."
     )
+    layout = st.radio(
+        "Organización del CSV",
+        ["Una fila por precio", "Una columna de precio por combustible"],
+        horizontal=True,
+    )
     columns = [""] + list(frame.columns)
     mapping = {}
     cols = st.columns(3)
@@ -108,14 +120,31 @@ def render() -> None:
         "province": "Provincia",
         "district": "Distrito",
     }
-    for index, key in enumerate((*REQUIRED, *OPTIONAL)):
+    fields = (
+        (*REQUIRED, *OPTIONAL) if layout == "Una fila por precio" else ("observed_date", *OPTIONAL)
+    )
+    for index, key in enumerate(fields):
         chosen = cols[index % 3].selectbox(labels[key], columns, key=f"map_{key}")
         if chosen:
             mapping[key] = chosen
-    if any(key not in mapping for key in REQUIRED):
-        st.info("Asigna fecha, combustible y precio para continuar.")
-        return
-    fuels = sorted(frame[mapping["fuel_type"]].dropna().astype(str).str.strip().unique())
+    if layout == "Una fila por precio":
+        if any(key not in mapping for key in REQUIRED):
+            st.info("Asigna fecha, combustible y precio para continuar.")
+            return
+        fuels = sorted(frame[mapping["fuel_type"]].dropna().astype(str).str.strip().unique())
+        price_columns = []
+    else:
+        if "observed_date" not in mapping:
+            st.info("Asigna la fecha observada para continuar.")
+            return
+        price_columns = st.multiselect(
+            "Columnas que representan precios de combustibles",
+            [column for column in frame if column not in mapping.values()],
+        )
+        fuels = price_columns
+        if not price_columns:
+            st.info("Selecciona al menos una columna de precio.")
+            return
     if len(fuels) > 50:
         st.error("La columna de combustible tiene demasiadas categorías; revisa el mapeo.")
         return
@@ -128,7 +157,10 @@ def render() -> None:
         st.info("Confirma todas las unidades según el diccionario para habilitar el análisis.")
         return
     try:
-        data, report = normalize(frame, mapping, units)
+        if layout == "Una fila por precio":
+            data, report = normalize(frame, mapping, units)
+        else:
+            data, report = normalize_wide(frame, mapping, price_columns, units)
     except ValueError as exc:
         st.error(str(exc))
         return

@@ -72,3 +72,24 @@ def test_changed_contract_creates_new_version(tmp_path):
     _, second = publish_snapshot(csv_path, root, MAPPING, UNITS, "https://example.org/v2", "ODC-BY")
     assert first["version_id"] != second["version_id"]
     assert json.loads((root / "current.json").read_text())["version"] == second["version_id"]
+
+
+def test_publish_wide_csv(tmp_path):
+    csv_path = tmp_path / "wide.csv"
+    root = tmp_path / "processed"
+    pd.DataFrame({"fecha": ["01/01/2026"], "GNV": [2.5], "DIESEL": [18.0]}).to_csv(
+        csv_path, index=False
+    )
+    status, manifest = publish_snapshot(
+        csv_path,
+        root,
+        {"observed_date": "fecha"},
+        {"GNV": "S/ por m³", "DIESEL": "S/ por galón"},
+        "https://example.org",
+        "ODC-BY",
+        ["GNV", "DIESEL"],
+    )
+    assert status == "updated"
+    assert manifest["row_count_valid"] == 2
+    data, _ = read_snapshot(root)
+    assert set(data["fuel_type"]) == {"GNV", "DIESEL"}

@@ -3,7 +3,7 @@ from datetime import date
 import pandas as pd
 import pytest
 
-from fuelscope.data import filter_data, normalize, summary
+from fuelscope.data import filter_data, normalize, normalize_wide, read_csv_bytes, summary
 
 
 def test_normalize_excludes_missing_and_zero_prices():
@@ -74,3 +74,45 @@ def test_duplicate_mapping_rejected():
     raw = pd.DataFrame({"a": ["01/01/2026"], "b": [3]})
     with pytest.raises(ValueError, match="columna diferente"):
         normalize(raw, {"observed_date": "a", "fuel_type": "a", "price": "b"}, {"GNV": "S/ por m³"})
+
+
+def test_wide_prices_are_melted_without_mixing_units():
+    raw = pd.DataFrame(
+        {
+            "fecha": ["01/01/2026", "02/01/2026"],
+            "departamento": ["LIMA", "CUSCO"],
+            "GNV": [2.0, None],
+            "DIESEL": [18.0, 19.0],
+        }
+    )
+    data, report = normalize_wide(
+        raw,
+        {"observed_date": "fecha", "department": "departamento"},
+        ["GNV", "DIESEL"],
+        {"GNV": "S/ por m³", "DIESEL": "S/ por galón"},
+    )
+    assert report["source_rows"] == 2
+    assert report["raw_rows"] == 4
+    assert report["valid_rows"] == 3
+    assert data.groupby("fuel_type")["price_unit"].first().to_dict() == {
+        "DIESEL": "S/ por galón",
+        "GNV": "S/ por m³",
+    }
+
+
+def test_nonfinite_price_is_excluded():
+    raw = pd.DataFrame(
+        {"fecha": ["01/01/2026", "01/01/2026"], "tipo": ["GNV", "GNV"], "valor": [2, float("inf")]}
+    )
+    data, report = normalize(
+        raw,
+        {"observed_date": "fecha", "fuel_type": "tipo", "price": "valor"},
+        {"GNV": "S/ por m³"},
+    )
+    assert data["price"].tolist() == [2]
+    assert report["missing_or_invalid_prices"] == 1
+
+
+def test_duplicate_csv_header_is_rejected_before_pandas_renames_it():
+    with pytest.raises(ValueError, match="duplicados"):
+        read_csv_bytes(b"fecha,precio,precio\n2026-01-01,2,3\n")

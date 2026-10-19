@@ -1,6 +1,6 @@
 # ADR 0001: migración de InsightFlow a FuelScope
 
-El nombre solicitado para el producto es **FuelScope**. La especificación adjunta proponía RutaCombustible, pero la instrucción directa del propietario establece el nombre vigente. El repositorio de ventas se conserva como origen con su historial; la migración se desarrolla en `feature/fuelscope-migration` desde `main`.
+El nombre solicitado para el producto es **FuelScope**. La especificación adjunta proponía RutaCombustible, pero la instrucción directa del propietario establece el nombre vigente. El mismo repositorio se renombró a `Kiara1616/FuelScope`, con historial conservado y etiqueta `v1-insightflow-sales` para la versión anterior. La migración se desarrolla en `feature/fuelscope-migration` desde `main`.
 
 La aplicación objetivo será un monolito modular de Streamlit con procesamiento separado y datos oficiales versionados. La fuente oficial bloquea la descarga en el entorno actual, de modo que la construcción de métricas y la publicación quedan sujetas a obtener y auditar el CSV y diccionario originales. No se presentarán cifras sintéticas como precios reales.
 
