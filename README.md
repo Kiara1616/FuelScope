@@ -76,7 +76,7 @@ El contrato usado para el archivo incorporado está en `data/source_contract.jso
 python -m scripts.update_data --csv RUTA.csv --contract data/source_contract.json
 ```
 
-El proceso guarda Parquet, manifiesto, informe de calidad y un puntero a la versión activa en `data/processed`. El mismo CSV y contrato devuelven `no_change`; un error mantiene el puntero anterior. La [tarea programada](.github/workflows/refresh-official.yml) consulta semanalmente la **URL directa de este recurso**, verifica que el diccionario y los metadatos no hayan cambiado, valida el esquema, la cobertura y el volumen, y solo entonces actualiza el snapshot. Si la descarga falla o el portal publica un recurso con otra URL o estructura, conserva la versión anterior y requiere revisión. Esta tarea no consulta precios vigentes de Facilito.
+El proceso guarda Parquet, manifiesto, informe de calidad y un puntero a la versión activa en `data/processed`. El mismo CSV y contrato devuelven `no_change`; un error mantiene el puntero anterior. La [tarea programada](.github/workflows/refresh-official.yml) consulta semanalmente la **URL directa de este recurso**, verifica que el diccionario y los metadatos no hayan cambiado, valida el esquema, la cobertura y el volumen, y solo entonces actualiza el snapshot. Su [primera ejecución manual en GitHub Actions](https://github.com/Kiara1616/FuelScope/actions/runs/39197140063) terminó correctamente sin cambios. Si la descarga falla o el portal publica un recurso con otra URL o estructura, conserva la versión anterior y requiere revisión. Esta tarea no consulta precios vigentes de Facilito.
 
 El workflow de CI ejecuta Ruff, pytest, compilación de Python, auditoría de dependencias y una prueba de arranque con Docker en pushes y pull requests.
 

@@ -6,7 +6,8 @@ CI: https://github.com/Kiara1616/FuelScope/actions
 Fuente de datos: https://www.datosabiertos.gob.pe/dataset/lista-de-precios-de-combustibles-diaria-reconstruida-partir-de-los-precios-actualizados
 
 Snapshot histórico: incorporado desde los archivos descargados por la propietaria; auditoría en docs/data_audit.md.
-Pendiente: revisión del PR de datos, aplicación FuelScope en Streamlit Community Cloud, verificación de la tarea semanal en GitHub Actions, artículo nuevo y video de demostración. No presentar la aplicación histórica de ventas como si fuera FuelScope.
+Actualización automática verificada: https://github.com/Kiara1616/FuelScope/actions/runs/39197140063
+Pendiente: aplicación FuelScope en Streamlit Community Cloud, artículo nuevo y video de demostración. No presentar la aplicación histórica de ventas como si fuera FuelScope.
 
 Versión histórica de ventas: https://github.com/Kiara1616/FuelScope/tree/v1-insightflow-sales
 Artículo histórico: https://dev.to/kiarazmurillo/del-dato-al-indicador-diseno-de-un-dashboard-de-ventas-reproducible-con-streamlit-2kg5
