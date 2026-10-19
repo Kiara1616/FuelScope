@@ -1,15 +1,12 @@
-InsightFlow Sales Dashboard
-Actividad: Visualization Reports or Dashboard
-Equipo: Kiara1616
+FuelScope — checklist de entrega (18 de octubre de 2026)
 
-Repositorio público:
-https://github.com/Kiara1616/insightflow-sales-dashboard
+Repositorio público: https://github.com/Kiara1616/FuelScope
+PR de migración (borrador): https://github.com/Kiara1616/FuelScope/pull/1
+CI del PR: https://github.com/Kiara1616/FuelScope/actions
+Fuente de datos prevista: https://www.datosabiertos.gob.pe/dataset/lista-de-precios-de-combustibles-diaria-reconstruida-partir-de-los-precios-actualizados
 
-Aplicación publicada en Streamlit Community Cloud:
-https://insightflow-sales-dashboard-he3kljwft48fj5lkjgtyu.streamlit.app
+Pendiente: snapshot oficial auditado, fusión del PR, aplicación FuelScope en Streamlit Community Cloud, artículo nuevo y video de demostración. No presentar la aplicación histórica de ventas como si fuera FuelScope.
 
-Artículo en Dev.to, Medium o Hashnode:
-PENDIENTE_DE_PUBLICAR
-
-Video público:
-PENDIENTE_DE_PUBLICAR
+Versión histórica de ventas: https://github.com/Kiara1616/FuelScope/tree/v1-insightflow-sales
+Artículo histórico: https://dev.to/kiarazmurillo/del-dato-al-indicador-diseno-de-un-dashboard-de-ventas-reproducible-con-streamlit-2kg5
+Aplicación histórica: https://insightflow-sales-dashboard-he3kljwft48fj5lkjgtyu.streamlit.app

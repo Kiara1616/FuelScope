@@ -2,12 +2,12 @@
 title: "Del dato al indicador: diseño y evaluación de un dashboard de ventas con Streamlit"
 description: "Un caso reproducible sobre indicadores, decisiones de visualización, automatización y límites de un dashboard publicado en la nube."
 tags: python, streamlit, dataviz, github
-cover_image: https://raw.githubusercontent.com/Kiara1616/insightflow-sales-dashboard/main/docs/assets/banner-articulo.png
+cover_image: https://raw.githubusercontent.com/Kiara1616/FuelScope/v1-insightflow-sales/docs/assets/banner-articulo.png
 ---
 
 ¿Qué debe mostrar un dashboard para que una persona pueda pasar de «¿cuánto vendimos?» a «¿dónde conviene investigar?»? Esa pregunta orientó la construcción de un panel de análisis comercial con Python. Partí de un archivo de ventas, definí indicadores, construí vistas interactivas, añadí pruebas y publiqué la aplicación en la nube. Comparto aquí tanto las decisiones de diseño como los límites de lo que el resultado permite afirmar.
 
-> **Explora el proyecto:** [aplicación interactiva](https://insightflow-sales-dashboard-he3kljwft48fj5lkjgtyu.streamlit.app) · [repositorio público y código fuente](https://github.com/Kiara1616/insightflow-sales-dashboard) · [pruebas automatizadas](https://github.com/Kiara1616/insightflow-sales-dashboard/actions)
+> **Explora el proyecto:** [aplicación interactiva](https://insightflow-sales-dashboard-he3kljwft48fj5lkjgtyu.streamlit.app) · [repositorio público y código fuente](https://github.com/Kiara1616/FuelScope/tree/v1-insightflow-sales) · [pruebas automatizadas](https://github.com/Kiara1616/FuelScope/actions)
 
 **Resumen.** Se desarrolló un dashboard descriptivo a partir de 18 registros sintéticos de ventas. El proceso comprende validación básica del esquema, transformación temporal, cálculo de indicadores sobre datos filtrados, visualización interactiva, pruebas automatizadas y publicación desde un repositorio abierto. El caso muestra una ruta reproducible para construir un panel; no constituye una evaluación de desempeño comercial real.
 
@@ -28,11 +28,11 @@ El alcance es **descriptivo y exploratorio**. El panel ayuda a localizar diferen
 
 ## 2. Unidad de análisis, preparación y calidad de los datos
 
-El archivo [`data/ventas.csv`](https://github.com/Kiara1616/insightflow-sales-dashboard/blob/main/data/ventas.csv) contiene **18 registros sintéticos** fechados entre enero y junio de 2025. Cada fila representa un registro de ventas de un producto en una fecha y región; no equivale necesariamente a una factura o pedido individual. Las variables son `fecha`, `region`, `categoria`, `producto`, `ventas` y `unidades`. El sol peruano (`S/`) es la unidad monetaria usada para mostrar los importes del ejemplo.
+El archivo [`data/ventas.csv`](https://github.com/Kiara1616/FuelScope/blob/v1-insightflow-sales/data/ventas.csv) contiene **18 registros sintéticos** fechados entre enero y junio de 2025. Cada fila representa un registro de ventas de un producto en una fecha y región; no equivale necesariamente a una factura o pedido individual. Las variables son `fecha`, `region`, `categoria`, `producto`, `ventas` y `unidades`. El sol peruano (`S/`) es la unidad monetaria usada para mostrar los importes del ejemplo.
 
 Esta granularidad importa: si una fila no es un pedido, dividir ingresos entre el número de filas no da un «ticket promedio». Tampoco hay identificadores de clientes, costos ni márgenes. Definir la unidad de análisis antes de crear indicadores evita que una cifra técnicamente correcta responda a la pregunta equivocada.
 
-Antes de visualizar, la aplicación convierte `fecha` a tipo fecha, comprueba que estén presentes las columnas requeridas y deriva un campo `mes`. Estas operaciones están implementadas en [`app.py`](https://github.com/Kiara1616/insightflow-sales-dashboard/blob/main/app.py). Las pruebas verifican, además, que el archivo no esté vacío y que ventas y unidades sean positivas.
+Antes de visualizar, la aplicación convierte `fecha` a tipo fecha, comprueba que estén presentes las columnas requeridas y deriva un campo `mes`. Estas operaciones están implementadas en [`app.py`](https://github.com/Kiara1616/FuelScope/blob/v1-insightflow-sales/app.py). Las pruebas verifican, además, que el archivo no esté vacío y que ventas y unidades sean positivas.
 
 La revisión de calidad es **básica**: el proyecto todavía no comprueba duplicados, fechas fuera de rango, monedas mezcladas ni coherencia entre producto y categoría. Tampoco implementa un proceso de carga desde una fuente transaccional. Conviene distinguir estas ausencias de lo que sí está probado.
 
@@ -87,18 +87,18 @@ Con todos los filtros incluidos, los cálculos sobre el archivo de ejemplo produ
 
 En la agregación mensual, mayo registra **S/ 64,700** y junio **S/ 39,900**. Entre las regiones, Lima suma **S/ 138,900**, Norte **S/ 100,600** y Sur **S/ 92,300**. Estos números demuestran que las vistas cambian de escala y permiten formular preguntas de seguimiento. **No demuestran** crecimiento, estacionalidad o superioridad comercial de una región: el conjunto es sintético, pequeño y no está acompañado por información sobre cobertura, objetivos o exposición al mercado.
 
-Quien quiera comprobarlos puede descargar [`ventas.csv`](https://github.com/Kiara1616/insightflow-sales-dashboard/blob/main/data/ventas.csv), ejecutar la aplicación o inspeccionar las operaciones de agrupación en [`app.py`](https://github.com/Kiara1616/insightflow-sales-dashboard/blob/main/app.py). La posibilidad de replicar una cifra es una propiedad más sólida que una captura aislada del panel.
+Quien quiera comprobarlos puede descargar [`ventas.csv`](https://github.com/Kiara1616/FuelScope/blob/v1-insightflow-sales/data/ventas.csv), ejecutar la aplicación o inspeccionar las operaciones de agrupación en [`app.py`](https://github.com/Kiara1616/FuelScope/blob/v1-insightflow-sales/app.py). La posibilidad de replicar una cifra es una propiedad más sólida que una captura aislada del panel.
 
 ## 6. Reproducibilidad, pruebas y publicación automatizada
 
-El [repositorio de InsightFlow Sales Dashboard](https://github.com/Kiara1616/insightflow-sales-dashboard) reúne el código de la aplicación, los datos de ejemplo, las dependencias, las pruebas y la configuración de integración continua. Se puede ejecutar localmente con:
+El [repositorio de InsightFlow Sales Dashboard](https://github.com/Kiara1616/FuelScope/tree/v1-insightflow-sales) reúne el código de la aplicación, los datos de ejemplo, las dependencias, las pruebas y la configuración de integración continua. Se puede ejecutar localmente con:
 
 ```bash
 python -m pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Las pruebas comprueban que el archivo de datos exista, que tenga las columnas previstas, que la fecha se procese correctamente y que ventas y unidades sean positivas. El [workflow de GitHub Actions](https://github.com/Kiara1616/insightflow-sales-dashboard/blob/main/.github/workflows/tests.yml) instala las dependencias y ejecuta `python -m pytest -q` en cada `push` y `pull request`. Puede consultarse [una ejecución satisfactoria](https://github.com/Kiara1616/insightflow-sales-dashboard/actions/runs/36220497285). Estas pruebas no verifican que las cifras mostradas en la interfaz coincidan con valores esperados para cada combinación de filtros; ese sería un paso posterior.
+Las pruebas comprueban que el archivo de datos exista, que tenga las columnas previstas, que la fecha se procese correctamente y que ventas y unidades sean positivas. El [workflow de GitHub Actions](https://github.com/Kiara1616/FuelScope/blob/v1-insightflow-sales/.github/workflows/tests.yml) instala las dependencias y ejecuta `python -m pytest -q` en cada `push` y `pull request`. Puede consultarse [una ejecución satisfactoria](https://github.com/Kiara1616/FuelScope/actions/runs/36220497285). Estas pruebas no verifican que las cifras mostradas en la interfaz coincidan con valores esperados para cada combinación de filtros; ese sería un paso posterior.
 
 El despliegue sigue otro mecanismo: [Streamlit Community Cloud](https://docs.streamlit.io/deploy/streamlit-community-cloud) toma el proyecto desde la rama `main` y publica la aplicación. La plataforma detecta cambios en el repositorio y actualiza la aplicación. Por tanto, GitHub Actions automatiza la **verificación**, mientras Streamlit Community Cloud automatiza la **actualización del despliegue**. Son procesos relacionados, pero cumplen funciones diferentes.
 
@@ -124,4 +124,4 @@ Si trabajas con dashboards similares, me interesa conocer cómo compruebas que u
 - Setlur, V., Correll, M., Satyanarayan, A. y Tory, M. (2024). [*Heuristics for Supporting Cooperative Dashboard Design*](https://vis.mit.edu/pubs/cooperative-dashboards/). *IEEE Transactions on Visualization and Computer Graphics*.
 - [Documentación de Streamlit Community Cloud](https://docs.streamlit.io/deploy/streamlit-community-cloud) y [documentación de eventos de GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows), consultadas para describir los mecanismos de publicación y ejecución automática.
 
-**Recursos del proyecto:** [código y documentación](https://github.com/Kiara1616/insightflow-sales-dashboard) · [aplicación en la nube](https://insightflow-sales-dashboard-he3kljwft48fj5lkjgtyu.streamlit.app) · [historial de automatización](https://github.com/Kiara1616/insightflow-sales-dashboard/actions).
+**Recursos del proyecto:** [código y documentación](https://github.com/Kiara1616/FuelScope/tree/v1-insightflow-sales) · [aplicación en la nube](https://insightflow-sales-dashboard-he3kljwft48fj5lkjgtyu.streamlit.app) · [historial de automatización](https://github.com/Kiara1616/FuelScope/actions).

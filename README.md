@@ -1,51 +1,42 @@
-# InsightFlow Sales Dashboard
+# FuelScope
 
-Panel interactivo para explorar el rendimiento de ventas por período, región, categoría y producto.
+Explorador de precios históricos de combustibles en Perú. **Estado actual: interfaz y procesamiento local disponibles; sin snapshot oficial auditado ni despliegue público nuevo.** No presenta precios actuales ni recomendaciones de compra.
 
-**[Explorar el dashboard](https://insightflow-sales-dashboard-he3kljwft48fj5lkjgtyu.streamlit.app)** · **[Leer el estudio técnico](docs/articulo-devto.md)** · **[Ver la automatización](https://github.com/Kiara1616/insightflow-sales-dashboard/actions)**
+La migración parte del repositorio histórico InsightFlow, cuyo historial y artículo previo permanecen disponibles en Git. El nombre FuelScope responde a la instrucción del propietario.
 
-## Qué permite analizar
+## Fuente y limitaciones
 
-- Ventas totales, unidades vendidas, venta promedio por unidad y producto con mayor facturación.
-- Evolución mensual de las ventas y comparación entre regiones.
-- Resumen por categoría y consulta de los registros filtrados.
-- Selección interactiva de regiones, categorías y fechas.
+La fuente prevista es el [conjunto de OSINERGMIN en la Plataforma Nacional de Datos Abiertos](https://www.datosabiertos.gob.pe/dataset/lista-de-precios-de-combustibles-diaria-reconstruida-partir-de-los-precios-actualizados), con licencia Open Data Commons Attribution License. El catálogo describe observaciones diarias y una frecuencia de publicación mensual. El servidor bloqueó la descarga del CSV y del diccionario desde este entorno. La aplicación no atribuye al archivo cargado una procedencia que no pueda verificar. Consulta [auditoría](docs/data_audit.md) y [fuente](docs/data_source.md).
 
-Los datos de `data/ventas.csv` son **datos de ejemplo** incluidos para demostrar el funcionamiento del panel. No representan ventas reales ni deben utilizarse para tomar decisiones comerciales.
+Las columnas del CSV se asignan explícitamente en la interfaz. Se admiten archivos con una fila por precio o con una columna de precio por combustible. Se exige fecha observada, precio y una unidad declarada para cada tipo. Se descartan fechas inválidas, precios nulos, cero o negativos y unidades ausentes. El significado de cero queda pendiente de confirmar en el diccionario. Las medianas, percentiles y rankings siempre se calculan para un solo combustible y unidad; cada métrica indica recuento. La carga existe solo durante la sesión y no guarda el CSV en el servidor. El límite de carga es 50 MB y un millón de filas. La exportación ofrece un JSON complementario con filtros, calidad y procedencia declarada; la app indica que no verificó esa procedencia.
 
-## Tecnologías y estructura
+## Ejecución
 
-La aplicación utiliza **Streamlit** para la interfaz, **Pandas** para preparar y agrupar los datos, y **Plotly** para los gráficos. Las comprobaciones se ejecutan con **Pytest** y se automatizan mediante **GitHub Actions** en cada `push` y `pull request`.
-
-```text
-app.py                       Aplicación y lógica de visualización
-data/ventas.csv              Datos de demostración
-tests/test_app.py             Validaciones del conjunto de datos
-.github/workflows/tests.yml  Integración continua
-requirements.txt             Dependencias de Python
-```
-
-## Ejecutar en local
-
-Requiere Python 3.12. Desde la raíz del repositorio:
+Requiere Python 3.12:
 
 ```bash
 python -m venv .venv
-```
-
-En Windows PowerShell, activa el entorno con `.venv\Scripts\Activate.ps1`; en macOS o Linux, usa `source .venv/bin/activate`. Después ejecuta:
-
-```bash
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 streamlit run app.py
 ```
 
-La aplicación estará disponible en `http://localhost:8501`.
+Pruebas: `python -m pytest -q`; estilo: `ruff check .` y `ruff format --check .`. Docker: `docker compose build && docker compose up`.
 
-## Calidad del proyecto
+## Ingesta manual preparada
 
-Ejecuta las pruebas localmente con `python -m pytest -q`. El [flujo de integración continua](.github/workflows/tests.yml) repite estas comprobaciones automáticamente en GitHub. La versión pública se actualiza desde la rama `main` en Streamlit Community Cloud.
+`python -m scripts.update_data --csv RUTA.csv --contract contrato.json` publica un snapshot Parquet local solo si el CSV supera la validación. El contrato JSON debe proporcionar `mapping`, `units` por combustible, `source_url` y `license`. Para formato largo, `mapping` incluye `observed_date`, `fuel_type`, `price` y territorios opcionales. Para formato ancho, incluye fecha y territorios; `price_columns` enumera las columnas de precios a convertir en observaciones. **El contrato oficial aún no existe**: requiere leer el CSV y su diccionario originales. Un CSV idéntico con contrato idéntico devuelve `no_change`; un error conserva el puntero al snapshot anterior. Cada versión incluye SHA-256 del origen, Parquet e informe de calidad, el contrato de normalización, recuentos y fechas de observación e ingesta. La fecha de descarga original se deja sin verificar. Consulta [arquitectura](docs/architecture.md).
 
-## Estudio técnico
+El directorio `data/processed` no incluye datos oficiales. Un snapshot real aprobado podrá versionarse e incorporarse en Docker tras la auditoría. La carga interactiva sigue disponible cuando no existe snapshot aprobado.
 
-El [artículo del proyecto](docs/articulo-devto.md) documenta la pregunta de análisis, las definiciones de los indicadores, las decisiones de visualización, la automatización y las limitaciones de los datos.
+## Arquitectura
+
+```mermaid
+flowchart LR
+    A[CSV verificado] --> B[Validación y normalización]
+    B --> C[Parquet y manifiesto]
+    C --> D[Streamlit]
+    E[CSV cargado en sesión] --> D
+    D --> F[Filtros, métricas y Plotly]
+```
+
+La descarga automática, la auditoría de datos reales y el despliegue público requieren acceso verificable a los recursos originales. El manifiesto y la ingesta manual ya están implementados, pero solo se han probado con fixtures sintéticos. La [versión histórica de ventas](https://github.com/Kiara1616/FuelScope/tree/v1-insightflow-sales) y su [artículo](docs/insightflow-article-historical.md) describen la etapa anterior.
