@@ -28,6 +28,8 @@ def test_publish_is_idempotent_and_readable(tmp_path):
     assert second == manifest
     assert (root / "current.json").read_bytes() == first_pointer
     assert (root / manifest["version_id"] / "manifest.json").read_bytes() == first_manifest
+    assert manifest["normalization_contract"]["mapping"] == MAPPING
+    assert (root / manifest["version_id"] / "quality_report.json").exists()
     data, loaded_manifest = read_snapshot(root)
     assert data["price"].tolist() == [2.5]
     assert loaded_manifest == manifest
@@ -49,6 +51,22 @@ def test_invalid_update_preserves_previous_snapshot(tmp_path):
     assert (root / "current.json").read_bytes() == pointer_before
 
 
+def test_missing_required_column_preserves_previous_snapshot(tmp_path):
+    csv_path = tmp_path / "source.csv"
+    root = tmp_path / "processed"
+    pd.DataFrame({"fecha": ["01/01/2026"], "tipo": ["GNV"], "valor": [2.5]}).to_csv(
+        csv_path, index=False
+    )
+    publish_snapshot(csv_path, root, MAPPING, UNITS, "https://example.org", "ODC-BY")
+    pointer_before = (root / "current.json").read_bytes()
+    pd.DataFrame({"fecha": ["02/01/2026"], "tipo": ["GNV"], "precio": [3.0]}).to_csv(
+        csv_path, index=False
+    )
+    with pytest.raises((ValueError, KeyError)):
+        publish_snapshot(csv_path, root, MAPPING, UNITS, "https://example.org", "ODC-BY")
+    assert (root / "current.json").read_bytes() == pointer_before
+
+
 def test_integrity_failure_is_detected(tmp_path):
     csv_path = tmp_path / "source.csv"
     root = tmp_path / "processed"
@@ -59,6 +77,18 @@ def test_integrity_failure_is_detected(tmp_path):
     file_path = root / manifest["version_id"] / "data.parquet"
     file_path.write_bytes(b"corrupt")
     with pytest.raises(ValueError, match="integridad"):
+        read_snapshot(root)
+
+
+def test_quality_report_tampering_is_detected(tmp_path):
+    csv_path = tmp_path / "source.csv"
+    root = tmp_path / "processed"
+    pd.DataFrame({"fecha": ["01/01/2026"], "tipo": ["GNV"], "valor": [2.5]}).to_csv(
+        csv_path, index=False
+    )
+    _, manifest = publish_snapshot(csv_path, root, MAPPING, UNITS, "https://example.org", "ODC-BY")
+    (root / manifest["version_id"] / "quality_report.json").write_text("{}", encoding="utf-8")
+    with pytest.raises(ValueError, match="calidad"):
         read_snapshot(root)
 
 
