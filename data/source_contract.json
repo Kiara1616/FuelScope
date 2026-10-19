@@ -1,0 +1,29 @@
+{
+  "mapping": {
+    "observed_date": "fe_eval",
+    "local_id": "ANON_CO_LOCAL_VENTA"
+  },
+  "price_columns": [
+    "g_premium",
+    "g_regular",
+    "diesel",
+    "gnv",
+    "glp_g",
+    "glp_e"
+  ],
+  "units": {
+    "g_premium": "unidad no documentada",
+    "g_regular": "unidad no documentada",
+    "diesel": "unidad no documentada",
+    "gnv": "unidad no documentada",
+    "glp_g": "unidad no documentada",
+    "glp_e": "unidad no documentada"
+  },
+  "source_url": "https://www.datosabiertos.gob.pe/dataset/lista-de-precios-de-combustibles-diaria-reconstruida-partir-de-los-precios-actualizados",
+  "resource_urls": {
+    "csv": "https://www.datosabiertos.gob.pe/sites/default/files/precios_combustibles_anonimizados_20260301_part1.csv",
+    "dictionary": "https://www.datosabiertos.gob.pe/sites/default/files/Diccionario%20de%20datos_Precios_Combustible.xlsx",
+    "metadata": "https://www.datosabiertos.gob.pe/sites/default/files/Metadatos%20Lista%20de%20precios_Combustible_6_0.docx"
+  },
+  "license": "Open Data Commons Attribution License"
+}

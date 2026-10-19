@@ -24,6 +24,14 @@ SOURCE_URL = (
     "lista-de-precios-de-combustibles-diaria-reconstruida-"
     "partir-de-los-precios-actualizados"
 )
+FUEL_LABELS = {
+    "g_premium": "Gasolina o gasohol premium",
+    "g_regular": "Gasolina o gasohol regular",
+    "diesel": "Diésel DB5-S",
+    "gnv": "Gas natural vehicular",
+    "glp_g": "GLP a granel",
+    "glp_e": "GLP envasado (balón de 10 kg)",
+}
 
 
 def render() -> None:
@@ -43,9 +51,9 @@ def render() -> None:
         "No sustituyen la consulta de precios vigentes en el establecimiento."
     )
     st.caption(
-        "La descarga automática oficial está bloqueada en este entorno. "
-        "Para explorar precios, carga un CSV obtenido legítimamente y verifica "
-        "sus columnas y unidades con el diccionario de la fuente."
+        "El snapshot incluido proviene del CSV de datos abiertos aportado por la propietaria. "
+        "No se actualiza automáticamente. "
+        "También puedes cargar otro CSV para explorarlo por separado."
     )
     try:
         snapshot = read_snapshot(Path("data/processed"))
@@ -54,20 +62,32 @@ def render() -> None:
         return
     if snapshot is not None:
         data, manifest = snapshot
-        st.caption(
-            f"Snapshot local {manifest['version_id'][:12]} · "
-            f"última observación {manifest['observation_max_date']} · "
-            f"ingesta {manifest['ingested_at_utc']}. "
-            "La procedencia declarada requiere verificación externa."
+        mode = st.radio(
+            "Origen de datos",
+            ["Snapshot histórico incluido", "Cargar otro CSV"],
+            horizontal=True,
         )
-        render_analysis(
-            data,
-            manifest["quality"],
-            source_file="snapshot local",
-            source_url=manifest["dataset_url"],
-            source_license=manifest["license"],
-        )
-        return
+        if mode == "Snapshot histórico incluido":
+            st.warning(
+                f"Datos históricos: observaciones hasta {manifest['observation_max_date']}. "
+                "Consulta Facilito para precios vigentes. El archivo no incluye departamento "
+                "y su diccionario no especifica la unidad física de cada combustible."
+            )
+            st.caption(
+                f"Snapshot local {manifest['version_id'][:12]} · "
+                f"última observación {manifest['observation_max_date']} · "
+                f"ingesta {manifest['ingested_at_utc']}. "
+                "CSV original y documentos conservados en el repositorio, data/raw; "
+                "auditoría en docs/data_audit.md."
+            )
+            render_analysis(
+                data,
+                manifest["quality"],
+                source_file="snapshot local",
+                source_url=manifest["dataset_url"],
+                source_license=manifest["license"],
+            )
+            return
     upload = st.file_uploader("Cargar CSV de precios históricos", type="csv")
     if upload is None:
         st.warning(
@@ -185,7 +205,11 @@ def render_analysis(
 ) -> None:
     with st.sidebar:
         st.header("Filtros")
-        fuel = st.selectbox("Combustible", sorted(data["fuel_type"].unique()))
+        fuel = st.selectbox(
+            "Combustible",
+            sorted(data["fuel_type"].unique()),
+            format_func=lambda value: FUEL_LABELS.get(value, value),
+        )
         dates = st.date_input(
             "Período observado",
             value=(data["observed_date"].min().date(), data["observed_date"].max().date()),

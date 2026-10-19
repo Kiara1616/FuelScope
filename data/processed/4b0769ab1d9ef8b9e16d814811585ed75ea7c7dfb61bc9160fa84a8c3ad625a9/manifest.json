@@ -1,0 +1,52 @@
+{
+  "publisher": "Declarado por operador; sin verificación automática",
+  "dataset_url": "https://www.datosabiertos.gob.pe/dataset/lista-de-precios-de-combustibles-diaria-reconstruida-partir-de-los-precios-actualizados",
+  "license": "Open Data Commons Attribution License",
+  "retrieved_at_utc": null,
+  "ingested_at_utc": "2026-10-19T03:40:47.781052+00:00",
+  "source_published_at": null,
+  "observation_min_date": "2026-01-01",
+  "observation_max_date": "2026-02-28",
+  "version_id": "4b0769ab1d9ef8b9e16d814811585ed75ea7c7dfb61bc9160fa84a8c3ad625a9",
+  "source_sha256": "a733b48f6ff24d1e0837b622c1ec472cc2bb2924dcb2a90b145a77e1d4262eaa",
+  "parquet_sha256": "508018054bdd70a6a04efd642b424b252d5b91cf7bee5cc4c344feff8e529e3a",
+  "quality_report_sha256": "6677f764bbda89a2da4871484d877c81a14173cea3a201b5cdbf158bba24851e",
+  "row_count_raw": 2982936,
+  "row_count_valid": 1061899,
+  "row_count_excluded": 1921037,
+  "schema_version": 1,
+  "pipeline_version": 2,
+  "last_update_status": "manual_unverified",
+  "normalization_contract": {
+    "mapping": {
+      "observed_date": "fe_eval",
+      "local_id": "ANON_CO_LOCAL_VENTA"
+    },
+    "units": {
+      "g_premium": "unidad no documentada",
+      "g_regular": "unidad no documentada",
+      "diesel": "unidad no documentada",
+      "gnv": "unidad no documentada",
+      "glp_g": "unidad no documentada",
+      "glp_e": "unidad no documentada"
+    },
+    "price_columns": [
+      "g_premium",
+      "g_regular",
+      "diesel",
+      "gnv",
+      "glp_g",
+      "glp_e"
+    ]
+  },
+  "quality": {
+    "raw_rows": 2982936,
+    "valid_rows": 1061899,
+    "excluded_rows": 1921037,
+    "missing_dates": 0,
+    "missing_or_invalid_prices": 1921037,
+    "zero_or_negative_prices": 0,
+    "missing_units": 0,
+    "source_rows": 497156
+  }
+}

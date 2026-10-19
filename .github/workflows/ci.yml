@@ -51,5 +51,11 @@ jobs:
           done
           docker logs fuelscope
           exit 1
+      - run: >-
+          docker exec fuelscope python -c
+          "from pathlib import Path;
+          from fuelscope.snapshot import read_snapshot;
+          data, manifest = read_snapshot(Path('data/processed'));
+          assert len(data) == manifest['row_count_valid'] == 1061899"
       - if: always()
         run: docker rm -f fuelscope || true

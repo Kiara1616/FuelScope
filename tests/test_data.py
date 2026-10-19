@@ -113,6 +113,22 @@ def test_nonfinite_price_is_excluded():
     assert report["missing_or_invalid_prices"] == 1
 
 
+def test_numeric_yyyymmdd_dates_from_official_wide_csv():
+    raw = pd.DataFrame(
+        {"fe_eval": [20260101, 20260228], "gnv": [1.8, None], "diesel": [None, 15.2]}
+    )
+    data, report = normalize_wide(
+        raw,
+        {"observed_date": "fe_eval"},
+        ["gnv", "diesel"],
+        {"gnv": "unidad no documentada", "diesel": "unidad no documentada"},
+    )
+    assert data["observed_date"].dt.date.tolist() == [date(2026, 1, 1), date(2026, 2, 28)]
+    assert report["raw_rows"] == 4
+    assert report["valid_rows"] == 2
+    assert report["missing_or_invalid_prices"] == 2
+
+
 def test_duplicate_csv_header_is_rejected_before_pandas_renames_it():
     with pytest.raises(ValueError, match="duplicados"):
         read_csv_bytes(b"fecha,precio,precio\n2026-01-01,2,3\n")

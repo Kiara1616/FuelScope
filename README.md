@@ -1,19 +1,19 @@
 # FuelScope
 
-**Explorador de precios de combustibles en Perú** — dashboard interactivo en Streamlit para analizar archivos CSV por fecha, combustible y territorio.
+**Explorador de precios de combustibles en Perú** — dashboard interactivo en Streamlit con un snapshot histórico de OSINERGMIN y carga opcional de otros archivos CSV.
 
-> FuelScope aún no incluye un conjunto oficial auditado. Los resultados de un archivo cargado describen únicamente ese archivo y no representan precios actuales ni recomendaciones de compra.
+> El snapshot incluido contiene precios reportados con fecha de observación entre enero y febrero de 2026. No representa precios actuales ni recomendaciones de compra. El diccionario entregado no documenta las unidades físicas y el CSV no contiene ubicación geográfica.
 
 ## Acceso al dashboard
 
-La aplicación se puede ejecutar [localmente](#instalación-local) o con [Docker](#docker). **Aún no hay una demo pública nueva verificada de FuelScope.**
+La aplicación se puede ejecutar [localmente](#instalación-local) o con [Docker](#docker); ambas opciones muestran el snapshot al abrirse. **Aún no hay una demo pública nueva verificada de FuelScope.**
 
 ## Funciones
 
 - Cargar un CSV de hasta 50 MB y un millón de filas, con precios en formato largo o ancho.
 - Asignar explícitamente las columnas de fecha, combustible, precio y territorio, y declarar una unidad para cada combustible.
-- Filtrar las observaciones por periodo, combustible y ubicación.
-- Explorar medianas, dispersión, tendencias y rankings territoriales con el número de observaciones visible.
+- Filtrar las observaciones por periodo y combustible; por departamento solo si otro CSV incorpora esa columna.
+- Explorar medianas, dispersión y tendencias con el número de observaciones visible. Los rankings territoriales requieren un archivo con departamento.
 - Exportar los datos filtrados y un JSON con filtros, calidad y procedencia declarada.
 - Generar localmente un snapshot Parquet versionado con manifiesto e informe de calidad verificables mediante SHA-256.
 
@@ -21,15 +21,15 @@ La carga interactiva dura solo durante la sesión. FuelScope no verifica automá
 
 ## Fuente de datos e interpretación
 
-La fuente prevista es el [conjunto de precios de combustibles de OSINERGMIN en la Plataforma Nacional de Datos Abiertos](https://www.datosabiertos.gob.pe/dataset/lista-de-precios-de-combustibles-diaria-reconstruida-partir-de-los-precios-actualizados), publicado con licencia Open Data Commons Attribution License. El catálogo describe observaciones diarias y publicación mensual. La descarga del CSV y su diccionario fue bloqueada desde este entorno, por lo que **el repositorio no contiene un snapshot oficial ni un contrato de columnas aprobado**. Consulta [fuente y licencia](docs/data_source.md) y [estado de la auditoría](docs/data_audit.md).
+La fuente es el [conjunto de precios de combustibles de OSINERGMIN en la Plataforma Nacional de Datos Abiertos](https://www.datosabiertos.gob.pe/dataset/lista-de-precios-de-combustibles-diaria-reconstruida-partir-de-los-precios-actualizados), publicado con licencia Open Data Commons Attribution License. La propietaria descargó el CSV, el diccionario y los metadatos desde el portal y los incorporó a este proyecto. El primer snapshot contiene **1 061 899 precios válidos** correspondientes al **1 de enero–28 de febrero de 2026**. El estado de la versión incluida se registra en [`data/source_status.json`](data/source_status.json). El catálogo indica publicación mensual. Consulta [fuente y licencia](docs/data_source.md) y [auditoría reproducible](docs/data_audit.md).
 
-La aplicación excluye fechas inválidas, precios nulos, cero o negativos y unidades ausentes. El significado de los ceros queda pendiente de confirmar con el diccionario original. Las comparaciones de precios se hacen dentro de un solo combustible y una sola unidad; un valor obtenido de un CSV externo no debe interpretarse como estadística oficial verificada.
+La aplicación excluye fechas inválidas, precios ausentes, cero o negativos. En este archivo solo se excluyeron celdas sin precio. Las comparaciones se hacen dentro de un solo combustible. El diccionario no indica la unidad física, por lo que el dashboard la marca como no documentada y evita comparaciones entre combustibles. Hay valores extremos conservados y documentados en la auditoría.
 
 ## Arquitectura
 
 ```mermaid
 flowchart LR
-    A[CSV local] --> B[Validación y normalización]
+    A[CSV OSINERGMIN archivado] --> B[Validación y normalización]
     B --> C[Parquet, manifiesto e informe de calidad]
     C --> D[Dashboard Streamlit]
     E[CSV cargado en sesión] --> D
@@ -58,7 +58,7 @@ python -m pip install -r requirements-dev.txt
 streamlit run app.py
 ```
 
-Abre <http://localhost:8501> y carga un CSV para explorar sus datos.
+Abre <http://localhost:8501>. El snapshot histórico aparece por defecto; también puedes cargar otro CSV durante la sesión.
 
 ## Docker
 
@@ -66,17 +66,17 @@ Abre <http://localhost:8501> y carga un CSV para explorar sus datos.
 docker compose up --build
 ```
 
-Abre <http://localhost:8501>. La imagen no incluye datos oficiales; la carga interactiva también está disponible en Docker.
+Abre <http://localhost:8501>. La imagen incluye el snapshot histórico validado; la carga interactiva también está disponible en Docker.
 
 ## Ingesta manual y automatización
 
-Cuando se disponga del CSV y el diccionario originales por un canal autorizado, el operador debe comprobar las columnas, unidades, cobertura y licencia, y crear un contrato JSON con `mapping`, `units`, `source_url` y `license`. Para CSV ancho, añade `price_columns`. Después puede ejecutar:
+El contrato usado para el archivo incorporado está en `data/source_contract.json`. Para reconstruir el snapshot desde el CSV archivado, descomprime `data/raw/precios_combustibles_anonimizados_20260301_part1.csv.gz` sin alterar sus bytes y ejecuta:
 
 ```bash
-python -m scripts.update_data --csv RUTA.csv --contract contrato.json
+python -m scripts.update_data --csv RUTA.csv --contract data/source_contract.json
 ```
 
-El proceso guarda Parquet, manifiesto, informe de calidad y un puntero a la versión activa en `data/processed`. El mismo CSV y contrato devuelven `no_change`; un error mantiene el puntero anterior. **La descarga y actualización automáticas de datos oficiales todavía no están implementadas**, porque falta auditar los archivos originales.
+El proceso guarda Parquet, manifiesto, informe de calidad y un puntero a la versión activa en `data/processed`. El mismo CSV y contrato devuelven `no_change`; un error mantiene el puntero anterior. La [tarea programada](.github/workflows/refresh-official.yml) consulta semanalmente la **URL directa de este recurso**, verifica que el diccionario y los metadatos no hayan cambiado, valida el esquema, la cobertura y el volumen, y solo entonces actualiza el snapshot. Si la descarga falla o el portal publica un recurso con otra URL o estructura, conserva la versión anterior y requiere revisión. Esta tarea no consulta precios vigentes de Facilito.
 
 El workflow de CI ejecuta Ruff, pytest, compilación de Python, auditoría de dependencias y una prueba de arranque con Docker en pushes y pull requests.
 
@@ -90,7 +90,10 @@ FuelScope/
 │   ├── data.py               # Lectura, validación y métricas
 │   └── snapshot.py           # Versionado e integridad
 ├── scripts/update_data.py    # Ingesta manual
-├── data/                     # Sin snapshot oficial incluido
+├── data/raw/                 # CSV original comprimido, diccionario y metadatos
+├── data/processed/           # Snapshot histórico Parquet y manifiesto
+├── data/source_contract.json # Mapeo y URL del recurso
+├── data/source_status.json   # Hash y cobertura de la versión incluida
 ├── tests/                    # Pruebas con datos sintéticos
 ├── docs/                     # Fuente, auditoría y arquitectura
 ├── .github/workflows/ci.yml  # Integración continua
@@ -112,6 +115,6 @@ Las pruebas usan filas sintéticas solo para verificar el procesamiento; no form
 
 ## Atribución y alcance
 
-Fuente prevista: **OSINERGMIN**, a través de la Plataforma Nacional de Datos Abiertos, bajo la licencia indicada en su catálogo. FuelScope es un análisis independiente y no implica aval de OSINERGMIN. Antes de publicar cifras o una demo con datos, es necesario verificar el CSV y su diccionario, fijar el contrato de normalización y auditar el snapshot resultante.
+Fuente: **OSINERGMIN**, a través de la Plataforma Nacional de Datos Abiertos, bajo la licencia indicada en su catálogo. FuelScope es un análisis independiente y no implica aval de OSINERGMIN. La descarga directa actual coincidió byte por byte con los archivos entregados por la propietaria; el portal no publicó un checksum propio. El snapshot está auditado respecto a esos archivos, pero ninguna actualización programada garantiza precios vigentes.
 
 La [versión histórica de ventas](https://github.com/Kiara1616/FuelScope/tree/v1-insightflow-sales) conserva el proyecto InsightFlow anterior.

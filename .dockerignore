@@ -4,6 +4,6 @@ __pycache__
 *.pyc
 tests
 docs
-data
+data/raw
 .env
 .streamlit/secrets.toml

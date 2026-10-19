@@ -12,7 +12,7 @@ flowchart LR
     F --> G[Plotly y CSV filtrado]
 ```
 
-El hash del origen y del contrato determina la versión. El pipeline crea los archivos de una versión antes de sustituir `current.json`. Si falla la validación o escritura, el puntero anterior permanece. La app comprueba el checksum de Parquet al cargar. La verificación de procedencia se hace fuera del programa y todavía está pendiente: el portal oficial bloqueó el acceso al CSV y al diccionario.
+El hash del origen y del contrato determina la versión. El pipeline crea los archivos de una versión antes de sustituir `current.json`. Si falla la validación o escritura, el puntero anterior permanece. La app comprueba los checksums de Parquet y del informe de calidad al cargar. El snapshot incluido proviene de los tres archivos que la propietaria descargó del portal; el contrato y la auditoría están versionados. El portal no ofrece un checksum independiente del CSV para corroborar su procedencia automáticamente.
 
 ```mermaid
 flowchart LR
@@ -21,4 +21,4 @@ flowchart LR
     R --> S[Streamlit Community Cloud]
 ```
 
-El flujo de datos programado, el merge y el despliegue nuevo no están activos. Los checks actuales cubren código y fixtures, no prueban un dataset oficial. La antigua aplicación pública de ventas sigue separada hasta poder verificar FuelScope con datos reales.
+La migración de código ya se fusionó. La tarea semanal de datos verifica la URL directa conocida y solo publica un cambio si pasa las validaciones; está pendiente probarla en GitHub Actions. El despliegue nuevo no está activo. El CI cubre código, fixtures y arranque con el snapshot incluido. La antigua aplicación pública de ventas sigue separada de FuelScope.

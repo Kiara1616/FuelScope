@@ -1,0 +1,10 @@
+{
+  "raw_rows": 2982936,
+  "valid_rows": 1061899,
+  "excluded_rows": 1921037,
+  "missing_dates": 0,
+  "missing_or_invalid_prices": 1921037,
+  "zero_or_negative_prices": 0,
+  "missing_units": 0,
+  "source_rows": 497156
+}
