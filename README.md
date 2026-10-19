@@ -13,6 +13,7 @@
 - Cargar un CSV de hasta 50 MB y un millón de filas, con precios en formato largo o ancho.
 - Asignar explícitamente las columnas de fecha, combustible, precio y territorio, y declarar una unidad para cada combustible.
 - Filtrar las observaciones por periodo y combustible; por departamento solo si otro CSV incorpora esa columna.
+- Cambiar entre apariencia clara y oscura desde la barra lateral; ambas usan la identidad visual roja de FuelScope.
 - Explorar medianas, dispersión y tendencias con el número de observaciones visible. Los rankings territoriales requieren un archivo con departamento.
 - Exportar los datos filtrados y un JSON con filtros, calidad y procedencia declarada.
 - Generar localmente un snapshot Parquet versionado con manifiesto e informe de calidad verificables mediante SHA-256.

@@ -35,8 +35,34 @@ FUEL_LABELS = {
     "glp_e": "GLP envasado (balón de 10 kg)",
 }
 
-INK = "#173a42"
-TEAL = "#087e80"
+THEMES = {
+    "Claro": {
+        "background": "#fffafa",
+        "surface": "#ffffff",
+        "sidebar": "#f9eeee",
+        "text": "#352027",
+        "muted": "#735d63",
+        "border": "#ead9dc",
+        "accent": "#b91f36",
+        "bar": "#d77380",
+        "grid": "#f0e6e8",
+    },
+    "Oscuro": {
+        "background": "#121417",
+        "surface": "#202328",
+        "sidebar": "#1b1e23",
+        "text": "#f7eef0",
+        "muted": "#c2adb2",
+        "border": "#3b3237",
+        "accent": "#f06475",
+        "bar": "#c5485d",
+        "grid": "#34343a",
+    },
+}
+
+
+def active_theme() -> dict[str, str]:
+    return THEMES[st.session_state.get("appearance", "Claro")]
 
 
 def spanish_number(value: float | int, decimals: int = 0) -> str:
@@ -56,33 +82,58 @@ def metric_card(label: str, value: str, detail: str) -> None:
 
 
 def page_style() -> None:
+    colors = active_theme()
+    variables = "\n".join(f"--fs-{name}:{value};" for name, value in colors.items())
+    color_scheme = "dark" if st.session_state.appearance == "Oscuro" else "light"
     st.markdown(
+        f"<style>:root,.stApp{{{variables}color-scheme:{color_scheme};}}</style>"
         """<style>
+        .stApp,[data-testid="stAppViewContainer"]{background:var(--fs-background);color:var(--fs-text)}
+        .stApp{--primary-color:var(--fs-accent);--background-color:var(--fs-background);
+          --secondary-background-color:var(--fs-surface);--text-color:var(--fs-text)}
+        [data-testid="stHeader"]{background:var(--fs-background)}
+        [data-testid="stToolbar"]{color:var(--fs-text)}
         .block-container{max-width:1260px;padding-top:1.3rem;padding-bottom:3rem}
-        [data-testid="stSidebar"]{background:#f2f7f6;border-right:1px solid #e0eae8}
+        [data-testid="stSidebar"]{background:var(--fs-sidebar);
+          border-right:1px solid var(--fs-border)}
         [data-testid="stSidebar"] .block-container{padding-top:1.8rem}
+        [data-testid="stMarkdownContainer"]{color:var(--fs-text)}
+        [data-testid="stWidgetLabel"],[data-testid="stCaptionContainer"]{color:var(--fs-muted)}
+        [data-testid="stSidebar"] button[kind="secondary"]{
+          border-color:var(--fs-accent);color:var(--fs-accent);
+          background:var(--fs-surface);font-weight:650}
+        [data-baseweb="select"]>div,[data-baseweb="input"]>div,
+        [data-testid="stDateInput"] input{
+          background:var(--fs-surface);color:var(--fs-text);
+          border-color:var(--fs-border)}
+        [data-baseweb="popover"],[data-baseweb="calendar"]{
+          background:var(--fs-surface);color:var(--fs-text)}
+        [data-baseweb="popover"] li,[data-baseweb="calendar"] button{
+          color:var(--fs-text)}
         .fs-hero{padding:1.8rem 2rem;border-radius:20px;
-          background:linear-gradient(120deg,#103a43 0%,#0d6066 72%,#138683 100%);
-          color:#fff;box-shadow:0 10px 30px rgba(16,58,67,.12);margin-bottom:1.1rem}
+          background:linear-gradient(120deg,#49131e 0%,#871b2d 65%,#bf2b43 100%);
+          color:#fff;box-shadow:0 10px 30px rgba(76,16,31,.18);margin-bottom:1.1rem}
         .fs-eyebrow{font-size:.73rem;letter-spacing:.13em;font-weight:750;
-          text-transform:uppercase;color:#b8e7df;margin-bottom:.5rem}
+          text-transform:uppercase;color:#ffd6dd;margin-bottom:.5rem}
         .fs-hero h1{font-size:clamp(2.2rem,4vw,3.1rem);line-height:1.05;
           color:#fff;margin:0 0 .45rem;font-weight:760}
-        .fs-hero p{color:#e0f1ef;font-size:1.02rem;margin:0;max-width:770px}
+        .fs-hero p{color:#ffe9ed;font-size:1.02rem;margin:0;max-width:770px}
         .fs-hero-meta{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:1.25rem}
-        .fs-pill{display:inline-block;padding:.34rem .7rem;border:1px solid #84bdbb;
-          border-radius:999px;color:#f4ffff;font-size:.79rem;font-weight:650}
-        .fs-section{margin:1.7rem 0 .25rem;color:#173a42;font-size:1.36rem;font-weight:740}
-        .fs-section-sub{color:#617c82;font-size:.91rem;margin-bottom:1rem}
-        .fs-metric{background:#fff;border:1px solid #dce9e7;border-top:3px solid #0d8988;
+        .fs-pill{display:inline-block;padding:.34rem .7rem;border:1px solid #f2aab7;
+          border-radius:999px;color:#fff;font-size:.79rem;font-weight:650}
+        .fs-section{margin:1.7rem 0 .25rem;color:var(--fs-text);font-size:1.36rem;font-weight:740}
+        .fs-section-sub{color:var(--fs-muted);font-size:.91rem;margin-bottom:1rem}
+        .fs-metric{background:var(--fs-surface);border:1px solid var(--fs-border);
+          border-top:3px solid var(--fs-accent);
           border-radius:14px;padding:1rem 1.1rem;min-height:145px;
-          box-shadow:0 5px 18px rgba(20,62,69,.045);margin-bottom:.35rem}
-        .fs-metric-label{font-size:.81rem;color:#607b81;font-weight:650;min-height:2.25rem}
+          box-shadow:0 5px 18px rgba(51,15,26,.06);margin-bottom:.35rem}
+        .fs-metric-label{font-size:.81rem;color:var(--fs-muted);
+          font-weight:650;min-height:2.25rem}
         .fs-metric-value{font-size:clamp(1.5rem,2.6vw,2.15rem);font-weight:760;
-          color:#173a42;line-height:1.12;white-space:nowrap}
-        .fs-metric-detail{font-size:.73rem;color:#6c858a;margin-top:.55rem;
+          color:var(--fs-text);line-height:1.12;white-space:nowrap}
+        .fs-metric-detail{font-size:.73rem;color:var(--fs-muted);margin-top:.55rem;
           line-height:1.3;overflow-wrap:anywhere}
-        .fs-note{color:#667f85;font-size:.82rem;line-height:1.45;margin:.45rem 0 1rem}
+        .fs-note{color:var(--fs-muted);font-size:.82rem;line-height:1.45;margin:.45rem 0 1rem}
         @media(max-width:800px){.fs-hero{padding:1.35rem 1.25rem}.fs-metric{min-height:125px}}
         </style>""",
         unsafe_allow_html=True,
@@ -104,6 +155,14 @@ def hero(end_date: str, *, uploaded: bool = False) -> None:
 
 
 def render() -> None:
+    if "appearance" not in st.session_state:
+        st.session_state.appearance = "Claro"
+    with st.sidebar:
+        st.markdown("### Apariencia")
+        next_mode = "Oscuro" if st.session_state.appearance == "Claro" else "Claro"
+        if st.button(f"Cambiar a modo {next_mode.lower()}", width="stretch"):
+            st.session_state.appearance = next_mode
+            st.rerun()
     page_style()
     try:
         snapshot = read_snapshot(Path("data/processed"))
@@ -243,6 +302,7 @@ def render_analysis(
     source_license: str,
     manifest: dict | None = None,
 ) -> None:
+    colors = active_theme()
     first_date = data["observed_date"].min().date()
     last_date = data["observed_date"].max().date()
     with st.sidebar:
@@ -334,8 +394,8 @@ def render_analysis(
             x=daily["day"],
             y=daily["price"],
             mode="lines+markers",
-            line={"color": TEAL, "width": 3},
-            marker={"color": TEAL, "size": 5},
+            line={"color": colors["accent"], "width": 3},
+            marker={"color": colors["accent"], "size": 5},
             customdata=daily[["hover_date", "hover_price"]].to_numpy(),
             hovertemplate="%{customdata[0]}<br>Mediana: %{customdata[1]}<extra></extra>",
         )
@@ -343,32 +403,38 @@ def render_analysis(
     fig.update_layout(
         height=360,
         margin={"l": 8, "r": 8, "t": 10, "b": 15},
-        paper_bgcolor="white",
-        plot_bgcolor="white",
-        font={"family": "Arial, sans-serif", "color": INK},
+        paper_bgcolor=colors["background"],
+        plot_bgcolor=colors["background"],
+        font={"family": "Arial, sans-serif", "color": colors["text"]},
         hovermode="x unified",
-        xaxis={"title": None, "showgrid": False, "tickformat": "%d %b", "linecolor": "#c9d9d8"},
-        yaxis={"title": "Precio reportado", "gridcolor": "#e9f0ef", "zeroline": False},
+        xaxis={
+            "title": None,
+            "showgrid": False,
+            "tickformat": "%d %b",
+            "linecolor": colors["border"],
+        },
+        yaxis={"title": "Precio reportado", "gridcolor": colors["grid"], "zeroline": False},
     )
-    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
+    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False}, theme=None)
     st.caption(f"Unidad de precio: {unit}. Cada punto es la mediana de los reportes de ese día.")
     coverage, interpretation = st.columns([3, 2], gap="large")
     with coverage:
         st.markdown("#### Cobertura de reportes")
         volume = px.bar(daily, x="day", y="observations")
         volume.update_traces(
-            marker_color="#66a9a5", hovertemplate="%{x|%d/%m/%Y}<br>%{y:,} reportes<extra></extra>"
+            marker_color=colors["bar"],
+            hovertemplate="%{x|%d/%m/%Y}<br>%{y:,} reportes<extra></extra>",
         )
         volume.update_layout(
             height=250,
             margin={"l": 5, "r": 5, "t": 10, "b": 10},
-            paper_bgcolor="white",
-            plot_bgcolor="white",
-            font={"family": "Arial, sans-serif", "color": INK},
+            paper_bgcolor=colors["background"],
+            plot_bgcolor=colors["background"],
+            font={"family": "Arial, sans-serif", "color": colors["text"]},
             xaxis={"title": None, "showgrid": False, "tickformat": "%d %b"},
-            yaxis={"title": "Reportes", "gridcolor": "#e9f0ef", "zeroline": False},
+            yaxis={"title": "Reportes", "gridcolor": colors["grid"], "zeroline": False},
         )
-        st.plotly_chart(volume, width="stretch", config={"displayModeBar": False})
+        st.plotly_chart(volume, width="stretch", config={"displayModeBar": False}, theme=None)
     with interpretation:
         st.markdown("#### Cómo leer estas cifras")
         st.write(
@@ -394,8 +460,15 @@ def render_analysis(
                 hover_data=["observations"],
                 title="Mediana por departamento",
             )
-            chart.update_layout(xaxis_title=f"Precio ({unit})", yaxis_title="Departamento")
-            st.plotly_chart(chart, width="stretch", config={"displayModeBar": False})
+            chart.update_traces(marker_color=colors["bar"])
+            chart.update_layout(
+                xaxis_title=f"Precio ({unit})",
+                yaxis_title="Departamento",
+                paper_bgcolor=colors["background"],
+                plot_bgcolor=colors["background"],
+                font={"color": colors["text"]},
+            )
+            st.plotly_chart(chart, width="stretch", config={"displayModeBar": False}, theme=None)
     st.markdown("### Explorar datos")
     with st.expander("Ver registros y descargar datos"):
         st.dataframe(filtered.head(1000), width="stretch", hide_index=True)
