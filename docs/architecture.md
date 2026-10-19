@@ -21,4 +21,4 @@ flowchart LR
     R --> S[Streamlit Community Cloud]
 ```
 
-La migración de código ya se fusionó. La tarea semanal de datos verifica la URL directa conocida y solo publica un cambio si pasa las validaciones; está pendiente probarla en GitHub Actions. El despliegue nuevo no está activo. El CI cubre código, fixtures y arranque con el snapshot incluido. La antigua aplicación pública de ventas sigue separada de FuelScope.
+La migración de código ya se fusionó. La tarea semanal de datos verifica la URL directa conocida y solo publica un cambio si pasa las validaciones; una ejecución manual en GitHub Actions confirmó la descarga y `no_change`. El despliegue nuevo no está activo. El CI cubre código, fixtures y arranque con el snapshot incluido. La antigua aplicación pública de ventas sigue separada de FuelScope.

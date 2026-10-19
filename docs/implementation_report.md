@@ -8,7 +8,7 @@ Se clonó el repositorio de origen y se creó `feature/fuelscope-migration` desd
 
 ## Datos incorporados
 
-El portal rechazó algunas descargas automáticas desde este entorno, pero la propietaria aportó el CSV, el diccionario y los metadatos originales descargados desde su navegador. Una descarga posterior por las URLs directas coincidió byte por byte con los tres archivos. Se auditó el esquema y se generó un snapshot histórico de 1 061 899 precios válidos entre enero y febrero de 2026. El archivo no contiene territorio y el diccionario no declara la unidad física de cada precio; estas limitaciones se muestran en la interfaz. La [auditoría detallada](data_audit.md) registra hashes, fechas, recuentos y valores extremos. La tarea semanal de actualización está preparada; su acceso desde GitHub Actions aún debe comprobarse.
+El portal rechazó algunas descargas automáticas desde este entorno, pero la propietaria aportó el CSV, el diccionario y los metadatos originales descargados desde su navegador. Una descarga posterior por las URLs directas coincidió byte por byte con los tres archivos. Se auditó el esquema y se generó un snapshot histórico de 1 061 899 precios válidos entre enero y febrero de 2026. El archivo no contiene territorio y el diccionario no declara la unidad física de cada precio; estas limitaciones se muestran en la interfaz. La [auditoría detallada](data_audit.md) registra hashes, fechas, recuentos y valores extremos. La tarea semanal de actualización se probó desde GitHub Actions y devolvió `no_change`.
 
 ## Verificación local
 
@@ -16,8 +16,8 @@ El portal rechazó algunas descargas automáticas desde este entorno, pero la pr
 
 ## Verificación en GitHub
 
-El [PR #1](https://github.com/Kiara1616/FuelScope/pull/1) y el [PR #2](https://github.com/Kiara1616/FuelScope/pull/2) están fusionados en `main`. El cambio del snapshot requiere su propia revisión y nueva ejecución de CI.
+Los [PR #1](https://github.com/Kiara1616/FuelScope/pull/1), [#2](https://github.com/Kiara1616/FuelScope/pull/2) y [#3](https://github.com/Kiara1616/FuelScope/pull/3) están fusionados en `main`. El PR de datos pasó lint, test, security y docker-smoke en CI. La [ejecución manual de actualización](https://github.com/Kiara1616/FuelScope/actions/runs/39197140063) también pasó y no generó un commit porque la fuente seguía idéntica.
 
 ## Pendiente de verificación
 
-El despliegue público de FuelScope sigue pendiente; la URL histórica de ventas no debe reutilizarse como si mostrara esta aplicación. Falta verificar que la URL directa funcione desde GitHub Actions y detectar si el portal publica versiones nuevas con otro nombre de archivo. Las unidades físicas no figuran en el diccionario y requieren confirmación de OSINERGMIN antes de presentarse como soles por galón, metro cúbico o balón.
+El despliegue público de FuelScope sigue pendiente; la URL histórica de ventas no debe reutilizarse como si mostrara esta aplicación. La tarea programada cubre la URL directa actual, pero no descubre si el portal publica versiones nuevas con otro nombre de archivo. Las unidades físicas no figuran en el diccionario y requieren confirmación de OSINERGMIN antes de presentarse como soles por galón, metro cúbico o balón.
