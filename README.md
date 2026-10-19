@@ -1,6 +1,6 @@
 # FuelScope
 
-Explorador de precios históricos de combustibles en Perú. **Estado actual: aplicación en el [PR de migración](https://github.com/Kiara1616/FuelScope/pull/1), sin snapshot oficial auditado ni despliegue público nuevo.** No presenta precios actuales ni recomendaciones de compra.
+Explorador de precios históricos de combustibles en Perú. **Estado actual: interfaz y procesamiento local disponibles; sin snapshot oficial auditado ni despliegue público nuevo.** No presenta precios actuales ni recomendaciones de compra.
 
 La migración parte del repositorio histórico InsightFlow, cuyo historial y artículo previo permanecen disponibles en Git. El nombre FuelScope responde a la instrucción del propietario.
 
@@ -26,7 +26,7 @@ Pruebas: `python -m pytest -q`; estilo: `ruff check .` y `ruff format --check .`
 
 `python -m scripts.update_data --csv RUTA.csv --contract contrato.json` publica un snapshot Parquet local solo si el CSV supera la validación. El contrato JSON debe proporcionar `mapping`, `units` por combustible, `source_url` y `license`. Para formato largo, `mapping` incluye `observed_date`, `fuel_type`, `price` y territorios opcionales. Para formato ancho, incluye fecha y territorios; `price_columns` enumera las columnas de precios a convertir en observaciones. **El contrato oficial aún no existe**: requiere leer el CSV y su diccionario originales. Un CSV idéntico con contrato idéntico devuelve `no_change`; un error conserva el puntero al snapshot anterior. Cada versión incluye SHA-256 del origen, Parquet e informe de calidad, el contrato de normalización, recuentos y fechas de observación e ingesta. La fecha de descarga original se deja sin verificar. Consulta [arquitectura](docs/architecture.md).
 
-El directorio `data/processed` está vacío en esta rama. Un snapshot real aprobado podrá versionarse e incorporarse en Docker tras la auditoría. La carga interactiva sigue disponible cuando no existe snapshot aprobado.
+El directorio `data/processed` no incluye datos oficiales. Un snapshot real aprobado podrá versionarse e incorporarse en Docker tras la auditoría. La carga interactiva sigue disponible cuando no existe snapshot aprobado.
 
 ## Arquitectura
 
