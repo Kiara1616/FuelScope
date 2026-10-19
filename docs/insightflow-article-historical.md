@@ -125,4 +125,3 @@ Si trabajas con dashboards similares, me interesa conocer cómo compruebas que u
 - [Documentación de Streamlit Community Cloud](https://docs.streamlit.io/deploy/streamlit-community-cloud) y [documentación de eventos de GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows), consultadas para describir los mecanismos de publicación y ejecución automática.
 
 **Recursos del proyecto:** [código y documentación](https://github.com/Kiara1616/FuelScope/tree/v1-insightflow-sales) · [aplicación en la nube](https://insightflow-sales-dashboard-he3kljwft48fj5lkjgtyu.streamlit.app) · [historial de automatización](https://github.com/Kiara1616/FuelScope/actions).
-

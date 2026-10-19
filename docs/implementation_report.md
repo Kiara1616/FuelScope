@@ -21,4 +21,3 @@ El [PR en borrador #1](https://github.com/Kiara1616/FuelScope/pull/1) conserva l
 ## Pendiente de verificación
 
 El despliegue público no se modificó; su relación con el repositorio renombrado debe verificarse antes de usarlo para FuelScope. Una consulta HTTP de la URL histórica mostró redirecciones a autenticación y no confirmó acceso público a la app. El pipeline manual de Parquet/JSON existe y está probado con fixtures sintéticos, pero no hay snapshot oficial ni contrato aprobado. Para completar la especificación original se requieren CSV y diccionario originales descargados por un canal autorizado. Solo entonces se podrán fijar mapeo, unidades, auditoría, snapshot, automatización y artículo nuevo con cifras verificadas.
-
