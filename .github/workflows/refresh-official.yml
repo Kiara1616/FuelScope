@@ -1,0 +1,49 @@
+name: Verificar datos oficiales
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 9 * * 1'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Descargar recursos publicados
+        shell: pwsh
+        run: |
+          $urls = Get-Content data/source_contract.json -Raw | ConvertFrom-Json
+          Invoke-WebRequest -Uri $urls.resource_urls.csv -OutFile "$env:RUNNER_TEMP\precios.csv" -TimeoutSec 180
+          Invoke-WebRequest -Uri $urls.resource_urls.dictionary -OutFile "$env:RUNNER_TEMP\diccionario.xlsx" -TimeoutSec 60
+          Invoke-WebRequest -Uri $urls.resource_urls.metadata -OutFile "$env:RUNNER_TEMP\metadatos.docx" -TimeoutSec 60
+      - name: Validar y actualizar snapshot si cambió
+        shell: pwsh
+        run: >-
+          python -m scripts.refresh_official
+          --csv "$env:RUNNER_TEMP\precios.csv"
+          --dictionary "$env:RUNNER_TEMP\diccionario.xlsx"
+          --metadata "$env:RUNNER_TEMP\metadatos.docx"
+      - run: python -m pytest -q
+      - run: ruff check .
+      - name: Publicar solo cambios validados
+        shell: pwsh
+        run: |
+          git add data/raw/precios_combustibles_anonimizados_20260301_part1.csv.gz data/processed data/source_status.json
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host 'El recurso no cambió.'
+            exit 0
+          }
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'data: actualizar snapshot oficial validado'
+          git push origin HEAD:main

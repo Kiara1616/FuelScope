@@ -2,9 +2,11 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && useradd --create-home appuser
+RUN pip --default-timeout=120 --retries=5 install --no-cache-dir -r requirements.txt \
+    && useradd --create-home appuser
 COPY app.py .
 COPY fuelscope ./fuelscope
+COPY data/processed ./data/processed
 COPY .streamlit ./.streamlit
 USER appuser
 EXPOSE 8501

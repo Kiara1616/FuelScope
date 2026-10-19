@@ -22,7 +22,10 @@ def read_csv_bytes(payload: bytes) -> pd.DataFrame:
 
 
 def normalize(
-    frame: pd.DataFrame, mapping: dict[str, str], units: dict[str, str]
+    frame: pd.DataFrame,
+    mapping: dict[str, str],
+    units: dict[str, str],
+    max_rows: int = 1_000_000,
 ) -> tuple[pd.DataFrame, dict]:
     """Valida y normaliza columnas seleccionadas; nunca infiere unidades."""
     missing = [key for key in REQUIRED if key not in mapping or mapping[key] not in frame]
@@ -32,12 +35,15 @@ def normalize(
         raise ValueError("Cada campo debe corresponder a una columna diferente.")
     if frame.columns.duplicated().any():
         raise ValueError("El CSV contiene nombres de columnas duplicados.")
-    if len(frame) > 1_000_000:
-        raise ValueError("El CSV supera el límite de un millón de filas de esta versión.")
+    if len(frame) > max_rows:
+        raise ValueError(f"El CSV supera el límite de {max_rows:,} observaciones de esta versión.")
     selected = {source: target for target, source in mapping.items() if source in frame}
     data = frame.rename(columns=selected)[list(selected.values())].copy()
     data["observed_date"] = pd.to_datetime(
-        data["observed_date"], errors="coerce", dayfirst=True, format="mixed"
+        data["observed_date"].astype("string").str.strip(),
+        errors="coerce",
+        dayfirst=True,
+        format="mixed",
     )
     data["price"] = pd.to_numeric(data["price"], errors="coerce")
     data["price"] = data["price"].where(np.isfinite(data["price"]))
@@ -84,17 +90,25 @@ def normalize_wide(
     used = set(mapping.values())
     if any(column not in frame or column in used for column in price_columns):
         raise ValueError("Las columnas de precio deben existir y ser distintas de los campos base.")
+    if len(frame) > 1_000_000:
+        raise ValueError("El CSV supera el límite de un millón de filas de esta versión.")
     base = frame[list(mapping.values()) + price_columns].rename(
         columns={source: target for target, source in mapping.items()}
     )
-    long = base.melt(
-        id_vars=list(mapping),
-        value_vars=price_columns,
-        var_name="fuel_type",
-        value_name="price",
-    )
+    parts = []
+    for column in price_columns:
+        present = base[column].notna()
+        part = base.loc[present, list(mapping)].copy()
+        part["fuel_type"] = column
+        part["price"] = base.loc[present, column].to_numpy()
+        parts.append(part)
+    long = pd.concat(parts, ignore_index=True)
     identity = {key: key for key in (*mapping, "fuel_type", "price")}
-    data, report = normalize(long, identity, units)
+    data, report = normalize(long, identity, units, max_rows=6_000_000)
+    missing_prices = len(frame) * len(price_columns) - len(long)
+    report["raw_rows"] += missing_prices
+    report["excluded_rows"] += missing_prices
+    report["missing_or_invalid_prices"] += missing_prices
     report["source_rows"] = len(frame)
     return data, report
 

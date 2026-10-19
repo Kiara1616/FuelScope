@@ -4,8 +4,8 @@ Fuente prevista: [OSINERGMIN, Lista de Precios de combustibles, diaria reconstru
 
 Consulta: 18 de octubre de 2026. El recurso CSV listado es `precios_combustibles_anonimizados_20260301_part1.csv` (28,26 MB según el catálogo, con marca de recurso del 11 de marzo de 2026). El diccionario listado es `Diccionario de datos_Precios_Combustible.xlsx`. Estos metadatos no certifican la fecha máxima de observación del archivo.
 
-## Acceso y contrato pendiente
+## Archivos incorporados y actualización
 
-La página y los recursos devolvieron HTTP 403 en la consulta web y HTTP 418 con un identificador de bloqueo en la petición directa desde este entorno. No se intentó eludir el control. Por ello, aún no se dispone del CSV ni del diccionario para verificar columnas, unidades, precios, cobertura o semántica de los ceros. No se define un mapeo de columnas ni se publica un snapshot analítico hasta leer ambos archivos originales.
+La página rechazó algunas solicitudes automáticas desde este entorno, pero la propietaria descargó y entregó los tres archivos originales desde el navegador. La URL directa de cada recurso respondió después a una descarga normal; los tres SHA-256 coincidieron exactamente con los archivos entregados. Se incorporó un snapshot histórico derivado del CSV y se conservaron los archivos originales en `data/raw`. La [auditoría](data_audit.md) documenta hashes, esquema, cobertura, exclusiones y limitaciones. El diccionario no especifica la unidad física de cada precio y el CSV no incluye territorio. Una tarea semanal verifica la URL directa conocida; aún debe comprobarse su acceso desde GitHub Actions y no descubre nuevas URLs si el portal cambia el nombre del archivo.
 
 Recursos: [CSV](https://www.datosabiertos.gob.pe/dataset/lista-de-precios-de-combustibles-diaria-reconstruida-partir-de-los-precios-actualizados-0), [diccionario](https://www.datosabiertos.gob.pe/dataset/lista-de-precios-de-combustibles-diaria-reconstruida-partir-de-los-precios-actualizados-2), [metadatos](https://www.datosabiertos.gob.pe/dataset/lista-de-precios-de-combustibles-diaria-reconstruida-partir-de-los-precios-actualizados-1).

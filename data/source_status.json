@@ -1,0 +1,13 @@
+{
+  "source_url": "https://www.datosabiertos.gob.pe/dataset/lista-de-precios-de-combustibles-diaria-reconstruida-partir-de-los-precios-actualizados",
+  "download_url": "https://www.datosabiertos.gob.pe/sites/default/files/precios_combustibles_anonimizados_20260301_part1.csv",
+  "source_sha256": "a733b48f6ff24d1e0837b622c1ec472cc2bb2924dcb2a90b145a77e1d4262eaa",
+  "dictionary_sha256": "dbfb913f27707595959207c1691c1e7f83c0b5de0720c18461b6ade7e07e55a2",
+  "metadata_sha256": "f55e77766b5e88197c52528bb57a68fa2dc3f9543aa45c17fa93288bb2739303",
+  "retrieved_at_utc": "2026-10-19T03:53:25.039743+00:00",
+  "snapshot_version": "4b0769ab1d9ef8b9e16d814811585ed75ea7c7dfb61bc9160fa84a8c3ad625a9",
+  "observation_min_date": "2026-01-01",
+  "observation_max_date": "2026-02-28",
+  "source_rows": 497156,
+  "valid_prices": 1061899
+}
