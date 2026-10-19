@@ -324,7 +324,7 @@ def render_analysis(
     st.markdown('<div class="fs-section">Evolución diaria</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="fs-section-sub">Mediana y cantidad de precios '
-        'reportados por fecha observada.</div>',
+        "reportados por fecha observada.</div>",
         unsafe_allow_html=True,
     )
     daily["hover_date"] = pd.to_datetime(daily["day"]).dt.strftime("%d/%m/%Y")
