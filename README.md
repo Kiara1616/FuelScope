@@ -6,7 +6,7 @@
 
 ## Acceso al dashboard
 
-La aplicación se puede ejecutar [localmente](#instalación-local) o con [Docker](#docker); ambas opciones muestran el snapshot al abrirse. **Aún no hay una demo pública nueva verificada de FuelScope.**
+**[Abrir FuelScope en Streamlit](https://fuelscope.streamlit.app/)**. También se puede ejecutar [localmente](#instalación-local) o con [Docker](#docker); todas las opciones muestran el snapshot histórico al abrirse.
 
 ## Funciones
 
